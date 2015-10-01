@@ -1,0 +1,163 @@
+---
+title: "HW4"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+1.(a)
+```{r}
+#from:to; from starting value 1 of sequence to end value 2 of the sequence
+1:20
+```
+(b)
+```{r}
+#from:to generates a sequence from 'from'(20) to 'to'(1) in steps of -1
+20:1
+```
+(c)
+```{r}
+#create vector from 1 to 20 and then 19 to 1
+c(1:20,19:1)
+```
+(d)
+```{r}
+#assign vactor value (4,6,3) to the variable tmp using <-
+tmp <- c(4,6,3)
+```
+(e)
+```{r}
+help(rep)
+#rep replicate the values in x. tmp is the vector to be replicated and 10 is the times.
+rep(tmp,10)
+```
+(f)
+```{r}
+#len = a non-negative integer is the desired length of the output vecotr, that is the vector tmp
+rep(tmp,len = 31)
+```
+(g)
+```{r}
+#c(10,20,30) means the first value in vector tmp is replicated for 10 times, the second value is replicated for 20 times and the third value is replicated for 30 times.
+rep(tmp,c(10,20,30))
+```
+2.
+```{r}
+#seq(3,6,0.1) means from the starting value 3 to ending value 6 by increment 0.1. Then assign this sequence to variable tmp. exp computes the exponential function and cos computes cosine function.
+tmp <- seq(3,6,by=0.1)
+exp(tmp)*cos(tmp)
+```
+3.(a)
+```{r}
+#seq(3,36,3) means from the starting value 3 to ending value 36 by increment 3. Then assign this sequence to variable tmp1. seq(1,34,3) means from the starting value 1 to ending value 34 by increment 3. Then assign this sequence to variable tmp2. ^ for exponentiation. 
+tmp1 <- seq(3,36,by=3)
+tmp2 <- seq(1,34,by=3)
+(0.1^tmp1)*(0.2^tmp2)
+```
+(b)
+```{r}
+#seq(1,24,1) means from the starting value 1 to ending value 24 by increment 1. Then assign this sequence to variable tmp. ^ for exponentiation. Plug tmp to the function and then get the result.
+tmp <- seq(1,25,by=1)
+(2^tmp)/tmp
+```
+4.(a)
+```{r}
+#10:100 generates a sequence from 10 to 100 step by 1. Then assign this sequence to variable tmp. Sum returns the sum of all the values present in the variable tmp.
+tmp <- 10:100
+sum(tmp^3+4*tmp^2)
+```
+(b)
+```{r}
+#1:25 generates a sequence from 1 to 25 step by 1. Then assign this sequence to variable tmp. Sum returns the sum of all the values present in the variable tmp.
+tmp <- 1:25
+sum((2^tmp)/tmp + 3^tmp/(tmp^2))
+```
+5.(a)
+```{r}
+help(paste)
+#paste is used to concatenate vector after converting to charater. Because the arguments are vectors, they are concatenated term-by-term to give a character vector result. The default seperator is one single space.
+paste("label",1:30)
+```
+(b)
+```{r}
+#The only difference from the last question is the sep="", which means there is no space between the terms.
+paste("fn", 1:30,sep="")
+```
+6.(a)
+```{r}
+#sample() means to create two vectors of random integers which are chosen with replacement from the integers 0,1,...,999 and boh vectors have length 250. replace=TRUE means the sampling is with replacement.
+set.seed(50)
+xVec <- sample(0:999,250,replace=TRUE)
+yVec <- sample(0:999,250,replace=TRUE)
+#A negative number inside [] means the element to leave out of the selection. yVec[-1] means the first element in yVec is left out and xVec[-length(xVec)] means the last element in xVec is left out.
+yVec[-1] - xVec[-length(xVec)]
+```
+(b)
+```{r}
+#A negative number inside [] means the element to leave out of the selection. yVec[-length(yVec)] means the last element in yVec is left out and xVec[-1] means the first element in xVec is left out.
+sin(yVec[-length(yVec)]) / cos(xVec[-1])
+```
+(c)
+```{r}
+#A negative number inside [] means the element to leave out of the selection. xVec[-c(249,250)] means the 249th and 259th elements in xVec is left out and xVec[-c(1,250)] means the first and the last elements in xVec is left out and xVec[-c(1,2)] means the first and second elements in xVec is left out.
+xVec[-c(249,250)] + 2*xVec[-c(1,250)]-xVec[-c(1,2)]
+```
+(d)
+```{r}
+#A negative number inside [] means the element to leave out of the selection. xVec[-1] means the first element in xVec is left out and xVec[-length(xVec)] means the last element in xVec is left out. Sum returns the sum of all the values present in the vetors.
+sum(exp(-xVec[-1])/(xVec[-length(xVec)]+10))
+```
+7.(a)
+```{r}
+#choose the elements which greater than 600 in yVec.
+yVec[yVec>600]
+```
+(b)
+```{r}
+#which() gives the TRUE indices of a logical object
+which (yVec>600)
+```
+(c)
+```{r}
+#	The question is asked to give values	in	xVec	which	correspond	to	the	values	in	yVec	which	are	>	600. xVec[] returns the values in xVec. [yVec>600] is asked to choose the elements which greater than 600 in yVec.
+xVec[yVec>600]
+```
+(d)
+```{r}
+#abs(x) computes the absolute value of x, sqrt(x) computes the square root of x, and mean(x) computes the arithmetic mean of x.
+sqrt(abs(xVec-mean(xVec)))
+```
+(e)
+```{r}
+#max(yVec) returns the maxima value of yVec. yVec>max(yVec)-200 meansvalues	in	yVec	are	within	200	of	the	maximum	value.
+sum(yVec>max(yVec)-200)
+```
+(f)
+```{r}
+#== means equal and %% indicates xVec mod 2.
+sum(xVec%%2==0)
+```
+(g)
+```{r}
+#order returns a permutation which rearranges yVec into ascending order.
+xVec[order(yVec)]
+```
+(h)
+```{r}
+#seq() generates a sequence from 1 to the length(yVec) in steps of 3. Thne assign this sequence to i. yVec[i] picks	out	the	elements	in	yVec	at	index	positions	1,4,7,10,13,...
+i = seq(1,length(yVec),by=3)
+yVec[i]
+```
+8.
+```{r}
+#cumprod() returns a vector whose elements are the cumulative products of the elements of the argument.
+1+sum(cumprod(seq(2,38,b=2)/seq(3,39,b=2)))
+
+```
+
+
+
+
+
+
