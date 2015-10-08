@@ -1,0 +1,96 @@
+---
+title: "HW5"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+#1 extract numeric colume
+```{r}
+require(ggplot2) #load the package of ggplot2
+data(diamonds) #load the specified data sets
+new_diamonds <- diamonds[sapply(diamonds,is.numeric)] 
+#This line of code is used to extract numeric variables. sapply() is used to return a matrix, each element of which is the result of applying the function inside. is.numeric is the function used to extract the numeric variables in the data sets diamonds.
+
+```
+
+#2 create data frame. 1st column: pair variable; 2nd column: correlation coefficient.
+```{r}
+head(new_diamonds)#I want to know the names of numeric variables
+
+#I create two sets of strings, and I want to generate the combinations from those two sets.
+set1 <- c("carat","depth","table","price","x","y","z")
+set2 <- c("carat","depth","table","price","x","y","z")
+
+#Use the outer and paste function together to generate the marrix of possible combinations
+a <- outer(set1,set2,paste,sep='-') 
+#The outer function is intended to form the outer product. However, it allows a third argument to replace simple multiplication with any function. Here I replace multiplication with string concatenation(paste), and the result is all combinations of strings. sep="-" is used to define a hyphen as the separator between the strings. 
+
+b <- a[!lower.tri(a)] 
+#I want all unique pairwise combinations of treatments. I eliminate the duplicates by removing the lower triangle. the lower.tri function indentifies that triangle, so inverting it identifies all elements outside the lower triangle.
+
+col1 <- as.vector(b) 
+#The result of outer is a matrix. I want the combinations in a vector instead, so I flatten the matrix using the as.vector function.
+
+col1
+
+d <- cor(new_diamonds)
+#new_diamonds is a date frame, then cor(new_diamonds) returns the correlation matrix. By default, cor calculates the Pearson ccorrelation, which assumes that underlying populations are normally distributed.
+
+col2 <- d[!lower.tri(d)] 
+#I want all unique pairwise combinations of treatments. I eliminate the duplicates by removing the lower triangle. the lower.tri function indentifies that triangle, so inverting it identifies all elements outside the lower triangle.
+
+col2
+
+dt <- data.frame(col1,col2)
+#use funcion data.frame to create data frame, the first colume is col1 which is the pair and the second colume is col2 which is the correlation coefficient.
+
+
+```
+
+#3 create a scatter plot for every pair of numeric variables (title:correlation coefficients)
+```{r}
+#line 54 to line 56 is the answer for question 1 and I copy the answer to question 3
+require(ggplot2)
+data(diamonds)
+new_diamonds <- diamonds[sapply(diamonds,is.numeric)]
+
+require(GGally) #load the package called GGally
+p <- ggpairs(new_diamonds, 1:7) 
+p
+#I try to use ggpairs function firstly to make a matrix of plots with a given data set new_diamonds. 1:7 means using the data from colunme 1 to columne 7 in the data set new_diamonds. The result gives the pair matrix plot and also the correlation coeeficient. However, I do not know how to add a titile to each plot containing the coefficient. So I change to the method below.
+
+scatterplots <- par(mfrow=c(3,7))
+#A vector of the form c(3, 7) means Subsequent figures will be drawn in an 3-by-7 array on the device by rows. And par() is used to set graphical parameters. The reason for this step is that I want to make sure all the plots can be presented.
+
+x=0 #give the initial value to x
+
+for (i in 1:6)
+{
+  for (j in (i+1):7)
+  {
+    x=x+1
+    plot(new_diamonds[c(i,j)],main=c(dt[x,2]))
+  }
+}
+#this loop is used to extract two different variables from the data set new_diamonds to be paired and then plot the scatter plot. The reason that i is in 1:6 but j is in (i+1):7 is because I want all the pairs to be unique. main=c(dt[x,2] means the title in each plot is the number in second columne in dt, which are the correlation coeeficients.
+
+par(scatterplots)
+#combine all the plots that come from the loop above 
+scatterplots
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
