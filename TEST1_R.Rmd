@@ -1,0 +1,76 @@
+---
+title: "TEST_R"
+output: html_document
+---
+
+
+
+#1 add a logical column to diamonds based on the ratio of 1's and 0's in the mtcars$vs. The variable in mtcars is numeric meaning that you will need to create a logical equivalent, extend it to the same length as diamonds and add it to diamonds data frame.
+```{r}
+require(ggplot2) #load the package of ggplot2
+data(diamonds) #load the specified data sets
+require(plyr) #load the package of plyr. The plyr package is a set of clean and consistent tools that implement the split-apply-combine pattern in R. 
+
+#Because the logical column adding is based on the ratio of 1's and 0's in the mtcars$vs, so firstly we need to calculate the ratio of 1's and 0's in the mtcars$vs. Thus count how many 1's in mtcars$vs and then divided by the length of mtcars$vs. Use the same method to calculate the ratio of 0's. Then we can get the two ratio.
+ratio_1 <- c(count(mtcars,c("vs"))[2,2]/length(mtcars$vs)) #if without [2,2], we get a table of frequency. The number in 2nd column 2nd row is the ratio of 1's. 
+ratio_0 <- c(count(mtcars,c("vs"))[1,2]/length(mtcars$vs)) #The number in 2nd column 1st row is the ratio of 0's. 
+
+#Use rep() to replicate the values of TRUE and FALSE. times is the number to be replicated. Since the logical column in diamonds uses the same ratio of 1 and o in mtcars$vs, so the length of diamonds times the ratio_1 is the total number of 1's in logical column of diamonds  and the length of diamonds times the ratio_o is the total number of 0's in logical column of diamonds. round() is used to round the values to the specified number of decimal places (default 0).
+true <- rep(TRUE,times=round(length(diamonds$carat)*ratio_1))
+false <- rep(FALSE,times=round(length(diamonds$carat)*ratio_0))
+
+diamonds <- cbind(logical=c(true,false),diamonds) #use cbind() to add logical column to diamonds data frame. 
+
+table(diamonds$logical) #I use the frequency table to check how many TRUE and FALSEin the logical column of diamonds. 
+
+```
+
+#2 Figure out how to generically extract all factor and logical columns from any data frame so the method you develop can be used on any data.
+```{r}
+factorCols <- diamonds[sapply(diamonds,is.factor)] 
+#This line of code is used to extract numeric variables. sapply() is used to return a matrix, each element of which is the result of applying the function inside. is.factor is the function used to extract the factor columns in the data sets diamonds.
+logicalCols <- diamonds[sapply(diamonds,is.logical)]
+#This line of code is used to extract numeric variables. sapply() is used to return a matrix, each element of which is the result of applying the function inside. is.logical is the function used to extract the logical columns in the data sets diamonds.
+```
+
+#3 plot a gray bar graph for every factor and logical variable
+```{r}
+new_diamonds <- cbind(factorCols,logicalCols)
+#Create a new data frame which only includes factor column and logical column in data diamonds. cbind is used to combine columns together. Then assign the name "new_diamonds" to this new data frame.
+names(new_diamonds)
+#I want to know the varaibles' names in order to plot the bar graph for them.
+
+bar_cut <- ggplot(new_diamonds,aes(x=cut)) +
+  geom_bar(fill="grey")
+#This uses the new_diamonds data frame, with the "cut" column for x values and the count of cut for y values bacause of without mapping anything to y. fill="grey" is used to fill the bin with color grey.
+bar_color <- ggplot(new_diamonds,aes(x=color)) +
+  geom_bar(fill="grey") 
+#This uses the new_diamonds data frame, with the "color" column for x values and the count of color for y values bacause of without mapping anything to y. fill="grey" is used to fill the bin with color grey.
+bar_clarity <- ggplot(new_diamonds,aes(x=clarity)) +
+  geom_bar(fill="grey")
+#This uses the new_diamonds data frame, with the "clarity" column for x values and the count of clarity for y values bacause of without mapping anything to y. fill="grey" is used to fill the bin with color grey.
+bar_logical <- ggplot(new_diamonds,aes(x=new_diamonds[[4]])) +
+  geom_bar(fill="grey") + xlab("Logical equivalent")
+##This uses the new_diamonds data frame, with the 4th column of new_diamonds for x values and the count of logical for y values bacause of without mapping anything to y. fill="grey" is used to fill the bin with color grey. xlab() is used to change the x-axis label to "logical equivalent".
+
+require(gridExtra)#load the package of gridExtra
+bar_graph <- grid.arrange(bar_cut,bar_color,bar_clarity,bar_logical, ncol=2)
+#I want to put together multiple plots side by side so I use the grid.arrange() function from within the gridExtra package.The syntax for this function is easy. To arrange N plots in an M column grid, this is the syntax:grid.arrange(Plot1, Plot2, бн , PlotN, ncol=M) 
+```
+
+#4 Create	a	list of frequency	tables that	contains one table for each categorical	and	logical variable in	the	data frame.
+```{r}
+fequency_list <- list() #Create a list neamed frequency_list
+for (i in 1:4) #the total number of categorical and logical variable is 4, so ask i from 1 to 4
+  fequency_list <- c(fequency_list,list(table(new_diamonds[i]))) # This loop is used to create 4 frequency table in a list. table() uses the cross-classifying factors to build a contingency table of the counts at each combination of factor levels. list() is used to consturct a list including the tables. Then assign this list of table to the list named "frequency_list".
+fequency_list #diaplay the list of frequency	tables that	contains one table for each categorical	and	logical variable in	the	data frame.
+```
+
+
+
+
+
+
+
+
+
