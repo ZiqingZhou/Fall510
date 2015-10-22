@@ -1,0 +1,128 @@
+---
+title: "HW6"
+output: html_document
+---
+
+#1 Plot	a	pair	of	blue	histograms	with	a	vertical	red	line	at	the	mean (one	using	counts	and the	other density) for	every numerical	variable	at	each	bin size	specified	in	the	bin sizes	input	parameter. You	can	plot	individually	or	as	a	grid.	If	you	chose	to	plot	as	a	grid, there	should	be	separate	grids	for	each	count-bin	size	combination	and	separate grids	for	each	density-bin	size combination.	
+	
+#2 Plot	a	gray bar	graph for	every	categorical and	binary	variable.
+
+#3 Calculate	the	r2 (r-square)	value	for	every	pair	of	numerical	variables.
+
+#4 Return	the	following in	an	R list:
+#  a. A	frequency	table	for	every	categorical	and	binary	variable
+#  b. For	numerical	variables
+#    i.   A	summary	statistics	table	for	each	numerical	variable
+#    ii.  A	data	frame	that	contains	each pair	of	variable names	and	the 
+#         associated r-square	value.
+#    iii. A	data	frame	that	contains	each pair	of	variable names	and	correlation	 
+#         coefficient	(Pearson)	for	all	coefficients	whose	absolute	value	is greater                      than	th correlation	threshold	(do	not	repeat	any	pairs)
+
+```{r}
+require(ggplot2)
+require(grid)
+require(gridExtra)
+explore <- function(data_frame,bin_size,threshold){
+# First step is to separate the columns by mode
+# This three lines are used to extract numeric, factor and logical variables of input data frame. Which() gives the TRUE indices of a logical object, allowing for array indices. lapply() returns a list of the same length as X, each element of which is the result of applying FUN to the corresponding element of X. is.numeric is the function used to extract the numeric columns in the data frame, is.factor is the function used to extract the factor columns in the data frame, and is.logic is the function used to extract the logical columns in the data frame. Then assign the selected columns to the variable named var_num, var_factor and var_logical repectively. 
+  var_num <- data_frame[which(lapply(data_frame, is.numeric) == TRUE)]
+  var_factor <- data_frame[which(lapply(data_frame, is.factor) == TRUE)]
+  var_logical <- data_frame[which(lapply(data_frame, is.logical) == TRUE)]
+
+N1 = colnames(var_num) #extract the column names of numeric column in order to assign the x-axis.
+#The total number of numeric variables is the length of var_num, so ask i from 1 to length(var_num). The number of plots displayed also depends on how many bin size input, so so ask i from 1 to length(bin_size)
+for (i in 1:length(var_num)){
+  for (j in 1:length(bin_size)){
+#Take th average value of every numeric variables and then map values to xintercept. geom_vline is used to draw vertical lines.
+p1 <- ggplot(var_num,aes_string(x=N1[i])) + geom_density(color="blue") + geom_vline(xintercept = sum(var_num[i])/length(rownames(data_frame)),color="red")
+p2 <- ggplot(var_num,aes_string(x=N1[i])) + geom_histogram(fill="blue",binwidth=bin_size[j]) + geom_vline(xintercept = sum(var_num[i])/length(rownames(data_frame)),color="red")
+#I want to put together multiple plots side by side so I use the grid.arrange() function from within the gridExtra package.The syntax for this function is easy. To arrange N plots in an M column grid, this is the syntax:grid.arrange(Plot1, Plot2, бн , PlotN, ncol=M) 
+grid.arrange(p1,p2)
+  }
+}
+
+#Plot	a	gray bar	graph for	every	categorical and	binary	variable.
+N2 = names(var_factor)
+#The total number of factor variable is the length of var_factor, so ask i from 1 to length(var_factor)
+for (i in 1:length(var_factor)){   
+#For the bar graph, the x-axis is the variables in var_factor, since no variable assigned to y so the y variable is the counts.
+bar_plot <- ggplot(var_factor,aes_string(x=N2[i])) + geom_bar(fill="gray")
+print(bar_plot)
+}
+
+N3 = names(var_logical)
+#The total number of logical variable is the length of var_factor, so ask i from 1 to length(var_logical)
+for (i in 1:length(var_logical)){
+#For the bar graph, the x-axis is the variables in var_logical, since no variable assigned to y so the y variable is the counts.
+bar_plot <- ggplot(var_logical,aes_string(x=N3[i])) + geom_bar(fill="gray")
+print(bar_plot)
+}
+  
+  
+#Create correlation matrix for numeric variables using cor function. method	is a character string indicating which correlation coefficient (or covariance) is to be computed. We specify the method as pearson correlation.
+  corr_a <- cor(var_num, method="pearson")
+  
+#Get the length of the one dimension of the square matrix and then assign the number of this length to a new variable named len.
+  len <- length(corr_a[1,])
+  
+#I want all unique pairwise combinations of treatments. So I want to eliminate the duplicates by removing the lower triangle. Therefore only loop through the upper right triangle. i in (1:(len-1) and j in ((i+1):len can achieve the goal that only loop the upper right triangle. 
+  for (i in (1:(len-1))) {
+    for (j in ((i+1):len)) {
+#Form the name pair. paste() is used to concatenate vectors. sep="-" is used to       define a hyphen as the separator between the strings. Finally add to the named        pair vector. 
+      pair_name <- paste(names(corr_a[,1])[[i]],names(corr_a[1,])[[j]],sep="-")
+      rsq_names <- c(rsq_names, pair_name)
+      
+#Add the r_square value to the value vector. Using the formula corr_a[i,j]^2 we can get the r^2.
+      r_square <- c(r_square, corr_a[i,j]^2)
+      
+#if the threshold is exceeded, add the name and value to the respective correlation vectors.
+      if (corr_a[i,j] > threshold) {
+        corr_names <- c(corr_names, pair_name)
+        corr_list <- c(corr_list, corr_a[i,j]) 
+      }
+    }
+  }
+  
+#create a data frame named rsq_df which combine rsq_names and r_square. Label the  first columns as "Pair" and the second column as "Value".
+  rsq_df <- data.frame(cbind(rsq_names, r_square))
+  names(rsq_df)[1] <- "Pair"
+  names(rsq_df)[2] <- "Value"
+
+#create a data frame named corr_df which combine corr_names and corr_list. Label the first columns as "Pair" and the second column as "Value". 
+  corr_df <- data.frame(cbind(corr_names, corr_list))
+  names(corr_df)[1] <- "Pair"
+  names(corr_df)[2] <- "Value"
+#Construct a list which include these two data frame and named as "rsquare" and "correlation" respectively. 
+  rsq_corr_list <- list("rsquare"=rsq_df, "correlation"=corr_df)
+  
+#Create a list neamed frequency_list
+  frequency_list <- list()
+#The total number of factor variable is the length of var_factor, so ask i from 1 to length(var_factor)
+  for (i in 1:length(var_factor)) 
+# This loop is used to create the number of length(var_factor) frequency table in a list. table() uses the cross-classifying factors to build a contingency table of the counts at each combination of factor levels. list() is used to consturct a list including the tables. Then assign this list of table to the list named "frequency_list".
+  frequency_list <- c(frequency_list,list(table(var_factor[i])))
+  
+#Create a list neamed summary_list
+  summary_list <- list()
+#The total number of numeric variable is the length of var_num, so ask i from 1 to length(var_num)
+  for (i in 1:length(var_num))
+#This loop is used to create the number of length(var_factor) summary table in a list. list() is used to consturct a list including the tables. Then assign this list of table to the list named "summary_list".
+    summary_list <- c(summary_list,list(summary(var_num[i])))
+ 
+#Construct a R_list which include rsq_corr_list, frequency list and summay list together. 
+  R_list <- list("frequency"=frequency_list,"summary"=summary_list,rsq_corr_list)
+#Display the R_list.
+  R_list
+  
+}
+#Test	your	function	by	Using	the	diamonds	data	frame	you	extended	to	include	the	VS	logical	column,	a	vector	of	bin sizes	(5,	20,	50),	and	a	correlation	threshold	of	0.25. Also	test	your	function	using	the	mtcars	data.
+diamonds$vs <- rep((mtcars$vs == 1)[3:22], 2697)#Create a logical vector based on the ratio of 1's and 0's in the mtcars$vs, extend it to the same length as diamonds and add it to diamonds data frame. And then add to diamonds.
+explore(diamonds,bin_size=c(5,20,50),0.25)
+explore(mtcars,bin_size=c(5,20,50),0.25)
+```
+
+
+
+
+	
+		
