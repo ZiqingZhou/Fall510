@@ -1,0 +1,374 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+
+```{r}
+#Firstly, get ready with the data set we needed for this test.
+abalone <- read.csv("http://archive.ics.uci.edu/ml/machine-learning-databases/abalone/abalone.data",header = F) 
+#read.csv helps to read a file in table format and create a data frame from it and I assign this new data frame with the name "abalone". header=F since the file does not contain the names of the varibles as its first line.
+names(abalone) <- c("sex","length","diameter","height","Whole_wgt","shucked_weight","viscera_weight","shell_weight","rings")
+#After googling, I know the names of the variables so I set the names of the variables in data set abalone.
+library(ggplot2)
+library(datasets)
+```
+
+1. Take	samples	of	1%,	10%,	25%,	50%,	80%,	and	100%	of	the	data.	Calculate	the	min,	max,	mean	and	variance of	the	Whole_wgt	column	from	each	sample	
+and	store	in	a	dataframe. There should	be 6 columns and four rows in	the	
+dataframe	(a	column for	each	sample	size and	a	row	for	each	measure).	
+Name the mean	row	SampleMean,	the	other	rows	appropriately, and	the	
+columns based	on	the	%	sample.
+```{r}
+one <- abalone[sample(1:nrow(abalone),0.01*nrow(abalone)), ]
+#sample takes a sample of the specified size. 1:nrow(abalone) tells r what elements to choose from, and 0.01*nrow(abalone) is the number of items to choose from. In this case, since taking samples of 1% of the data, 0.01*nrow(abalone). Assign this sample with the name one.
+min1 <- min(one$Whole_wgt)
+#min returns the minimun value of the input values, the variable Whole_wgt in the data set one.
+max1 <- max(one$Whole_wgt)
+#max returns the maximum value of the input values, the variable Whole_wgt in the data set one.
+mean1 <- mean(one$Whole_wgt)
+##mean returns the arithmetic mean of the input values, the variable Whole_wgt in the data set one.
+var1 <- var(one$Whole_wgt)
+#var computes the variance of the input values, the variable Whole_wgt in the data set one.
+one_percent <- c(min1,max1,mean1,var1)
+#use c to combine these four values - min1, max1, mean1 and var1 into a vector and assign the name one_percent.
+
+ten <- abalone[sample(1:nrow(abalone),0.1*nrow(abalone)), ]
+min2 <- min(ten$Whole_wgt)
+max2 <- max(ten$Whole_wgt)
+mean2 <- mean(ten$Whole_wgt)
+var2 <- var(ten$Whole_wgt)
+ten_percent <- c(min2,max2,mean2,var2)
+
+twentyfive <- abalone[sample(1:nrow(abalone),0.25*nrow(abalone)), ]
+min3 <- min(twentyfive$Whole_wgt)
+max3 <- max(twentyfive$Whole_wgt)
+mean3 <- mean(twentyfive$Whole_wgt)
+var3 <- var(twentyfive$Whole_wgt)
+twentyfive_percent <- c(min3,max3,mean3,var3)
+
+fifty <- abalone[sample(1:nrow(abalone),0.5*nrow(abalone)), ]
+min4 <- min(fifty$Whole_wgt)
+max4 <- max(fifty$Whole_wgt)
+mean4 <- mean(fifty$Whole_wgt)
+var4 <- var(fifty$Whole_wgt)
+fifty_percent <- c(min4,max4,mean4,var4)
+
+eighty <- abalone[sample(1:nrow(abalone),0.8*nrow(abalone)), ]
+min5 <- min(eighty$Whole_wgt)
+max5 <- max(eighty$Whole_wgt)
+mean5 <- mean(eighty$Whole_wgt)
+var5 <- var(eighty$Whole_wgt)
+eighty_percent <- c(min5,max5,mean5,var5)
+
+hundred <- abalone[sample(1:nrow(abalone),1*nrow(abalone)), ]
+min6 <- min(hundred$Whole_wgt)
+max6 <- max(hundred$Whole_wgt)
+mean6 <- mean(hundred$Whole_wgt)
+var6 <- var(hundred$Whole_wgt)
+hundred_percent <- c(min6,max6,mean6,var6)
+
+#The lines above just repeat what I did for the 1% of the data set abalone. 
+
+mydata <- data.frame(one_percent,ten_percent,twentyfive_percent,fifty_percent,eighty_percent,hundred_percent)
+#data.frame creates data frame tightly coupled collections of variables of one_percent,ten_percent,twentyfive_percent,fifty_percent,eighty_percent,hundred_percent and assign this data frame with the name mydata.
+mydata
+rownames(mydata) <- c("SampleMin","SampleMax","SampleMean","SampleVar")
+#set the row names for the data frame mydata.
+```
+
+2. Create	a	grid of	histograms that	contains all sample	sizes.
+```{r}
+library(gridExtra) #load the package of gridExtra.
+
+#Define a function with two parameters - dataset and sample percentage of the data set, to create a grid of histograms that contains all sample sizes. par is used to set graphical parameters. mfrow=c(2,3) means 2*3 pictures on one plot. Since we want to get different sample sizes, i is chosen from 0.01,0.1,0.25,0.5,0.8,1. sample takes a sample of the specified size. 1:nrow(abalone) tells r what elements to choose from, and i*nrow(abalone) is the number of items to choose from. Function hist computes a histogram of samples.
+grid_plot <- function(mydata,percentage){
+  par(mfrow=c(2,3))
+  for (i in percentage) {
+  hist(sample <- mydata[sample(1:nrow(abalone),i*nrow(abalone))])
+  }
+}
+
+#Test	my	function	by	Using	the	variable Whole_wgt in the data set abalone,	a	vector	of	sample sized	(0.01,0.1,0.25,0.5,0.8,1),and	a	correlation	threshold	of	0.25.
+grid_plot(abalone$Whole_wgt,c(0.01,0.1,0.25,0.5,0.8,1))
+
+```
+
+3. Implement a loop	that takes	1,000	samples	at	each of the	sample sizes in	1	above (except	the 100% sample!).	Calculate	a	mean	at each	iteration	and	store	the	results	in	a	dataframe.	There	should	be	four columns	and	1,000 rows.	Name the columns	but	NOT	the	rows.
+```{r}
+#Firstly, create a data frame with all variables numeric and assign the data frame with the name df. 
+df <- data.frame(One_percent=numeric(),Ten_percent=numeric(),Twentyfive_percent=numeric(),Fifty_percent=numeric(),Eighty_percent=numeric())
+#create a vector of the number of items we need to choose from, using percentage to multiply the the number of rows.
+sample_size=c(0.01*nrow(abalone),0.1*nrow(abalone),0.25*nrow(abalone),0.5*nrow(abalone),0.8*nrow(abalone))
+#Since the data frame has 1000 rows and 5 columns, I ask i to be chosen from 1 to 1000 and ask j to be chosen from 1 to 5. For each elements of the data frame df, we calculate the mean of the samples. 1:nrow(abalone) tells r what elements to choose from, and sample_size[j] is the number of items to choose from.
+for (i in 1:1000) {
+  for (j in 1:5) {
+    persample <- abalone$Whole_wgt[sample(1:nrow(abalone),sample_size[j])]
+    df[i,j] <- mean(persample)
+  }
+}
+df # check the data frame.
+```
+
+
+4. Create	another	grid	of	histograms that	contains the	four columns just	created	and	include	the 100%	sample from	1. (HINT:	You	should	create	a	function	to	solve	2	and	reuse	here).
+```{r}
+##Define a function with one parameters - dataset, to create a grid of histograms that contains the	four columns just	created	and	include	the 100%	sample from	1. par is used to set graphical parameters. mfrow=c(2,3) means 2*3 pictures on one plot. Since we want to get the	four columns just	created, i is chosen from the length of df then mydata[[i]] can reperesent the ith column in data frame df.  Function hist computes a histogram of samples.
+grid_plot1 <- function(mydata){
+  par(mfrow=c(2,3))
+  for (i in 1:length(df)) {
+  hist(mydata[[i]])
+  }
+  hist(hundred$Whole_wgt)
+}
+#test the function with data frame df. 
+grid_plot1(df)
+
+```
+
+5. Calculate	the min,	max, mean	and	variance of	each column	from	3 and	of	the	total	dataset	(the	100%	sample).	Append	to	the	dataframe	created	in	1.	Name the	mean	row	ResampleMean	and	the	others	appropriately.
+```{r}
+mydata_new = mydata
+#Since we want to calculate each column from 3, we let i from 1 to length of data frame df, then df[i] denotes the ith column of df and assign the column selected as new_sample. min, max, mean and var returns the minimum value, maximum value, arithmatics mean value and variance of each column. Create a data frame including the min,	max, mean	and	variance of	each column	from 3. 
+for (i in 1:length(df)){
+  new_sample <- df[[i]]
+  min <- min(new_sample)
+  max <- max(new_sample)
+  mean <- mean(new_sample)
+  var <- var(new_sample)
+  mydata_new <- data.frame(mydata_new,c(min,max,mean,var))
+}
+#Use data.frame function to combine the min,	max, mean	and	variance of	each column	from	3 and	of	the	total	dataset. hundred_percent is a vector including the min,	max, mean	and	variance of the total dataset.
+mydata_new <- data.frame(mydata_new,hundred_percent)
+#set the row names for the data frame mydata_new.
+rownames(mydata_new) <- c("ResampleMin","ResampleMax","ResampleMean","ResampleVar")
+```
+
+
+6. Create	a single histogram	of	the	100%	data	and	overlay and	label lines	that represent the	1%,	10%,	25%,	50%,	and	80%	SampleMean.
+```{r}
+#Previously we set the picture into 2*3, so now we reset the picture into 1*1 since only one plot for this part.
+par(mfrow=(1,1))
+#Function hist computes a histogram of the variable hundred_percent in the data set mydata.
+hist(mydata$hundred_percent)
+#Use for loop to draw lines	that represent the	1%,	10%,	25%,	50%,	and	80%	SampleMean. Since five sample sizes, we ask i from 1 to length of mydata. abline function helps to add straight lines through the current plot. v is the x-values for vertical lines. text draws the strings given in the vector labels at the coordinates. x is the numeric vector of coordinate where the text labels should be written.
+for (i in 1:length(mydata)) {
+  abline(v=mydata[3,i],col="red")
+  text(x=mydata[3,i],names(mydata)[i])
+}
+
+```
+
+7. Create	a	second	histogram	of	the	100%	data	and	overlay and	label	vertical
+lines	that	represent	the	1%,	10%,	25%,	50%,	and	80%	ResampleMean.
+```{r}
+#Function hist computes a histogram of the variable hundred_percent in the data set mydata_new.
+hist(mydata_new$hundred_percent)
+#Use for loop to draw lines	that represent the	1%,	10%,	25%,	50%,	and	80%	SampleMean. Since five sample sizes, we ask i from 1 to length of mydata. abline function helps to add straight lines through the current plot. v is the x-values for vertical lines. text draws the strings given in the vector labels at the coordinates. x is the numeric vector of coordinate where the text labels should be written.
+for (i in 1:length(mydata_new)) {
+  abline(v=mydata[3,i],col="red")
+  text(x=mydata[3,i],names(mydata)[i])
+}
+
+```
+
+8. Now execute your code on diamonds$carat	and	faithful$eruptions.
+```{r}
+#for diamond$carat
+Q1:
+one <- diamonds$carat[sample(1:nrow(diamonds),0.01*nrow(diamonds)), ]
+min1 <- min(one)
+max1 <- max(one)
+mean1 <- mean(one)
+var1 <- var(one)
+one_percent <- c(min1,max1,mean1,var1)
+
+ten <- diamonds$carat[sample(1:nrow(diamonds),0.1*nrow(diamonds)), ]
+min2 <- min(ten)
+max2 <- max(ten)
+mean2 <- mean(ten)
+var2 <- var(ten)
+ten_percent <- c(min2,max2,mean2,var2)
+
+twentyfive <- diamonds$carat[sample(1:nrow(diamonds),0.25*nrow(diamonds)), ]
+min3 <- min(twentyfive)
+max3 <- max(twentyfive)
+mean3 <- mean(twentyfive)
+var3 <- var(twentyfive)
+twentyfive_percent <- c(min3,max3,mean3,var3)
+
+fifty <- diamonds$carat[sample(1:nrow(diamonds),0.5*nrow(diamonds)), ]
+min4 <- min(fifty)
+max4 <- max(fifty)
+mean4 <- mean(fifty)
+var4 <- var(fifty)
+fifty_percent <- c(min4,max4,mean4,var4)
+
+eighty <- diamonds$carat[sample(1:nrow(diamonds),0.8*nrow(diamonds)), ]
+min5 <- min(eighty)
+max5 <- max(eighty)
+mean5 <- mean(eighty)
+var5 <- var(eighty)
+eighty_percent <- c(min5,max5,mean5,var5)
+
+hundred <- diamonds$carat[sample(1:nrow(diamonds),1*nrow(diamonds)), ]
+min6 <- min(hundred)
+max6 <- max(hundred)
+mean6 <- mean(hundred)
+var6 <- var(hundred)
+hundred_percent <- c(min6,max6,mean6,var6)
+
+mydata <- data.frame(one_percent,ten_percent,twentyfive_percent,fifty_percent,eighty_percent,hundred_percent)
+
+mydata
+rownames(mydata) <- c("SampleMin","SampleMax","SampleMean","SampleVar")
+#set the row names for the data frame mydata.
+
+Q2:
+grid_plot(diamonds$carat,c(0.01,0.1,0.25,0.5,0.8,1))
+
+Q3:
+df <- data.frame(One_percent=numeric(),Ten_percent=numeric(),Twentyfive_percent=numeric(),Fifty_percent=numeric(),Eighty_percent=numeric())
+sample_size=c(0.01*nrow(diamonds),0.1*nrow(diamonds),0.25*nrow(diamonds),0.5*nrow(diamonds),0.8*nrow(diamonds))
+for (i in 1:1000) {
+  for (j in 1:5) {
+    persample <- diamonds$carat[sample(1:nrow(diamonds),sample_size[j])]
+    df[i,j] <- mean(persample)
+  }
+}
+
+Q4:
+grid_plot1(df)
+
+Q5:
+mydata_new = mydata
+for (i in 1:length(df)){
+  new_sample <- df[[i]]
+  min <- min(new_sample)
+  max <- max(new_sample)
+  mean <- mean(new_sample)
+  var <- var(new_sample)
+  mydata_new <- data.frame(mydata_new,c(min,max,mean,var))
+}
+mydata_new <- data.frame(mydata_new,hundred_percent)
+
+rownames(mydata_new) <- c("ResampleMin","ResampleMax","ResampleMean","ResampleVar")
+
+Q6:
+par(mfrow=(1,1))
+hist(mydata$hundred_percent)
+for (i in 1:length(mydata)) {
+  abline(v=mydata[3,i],col="red")
+  text(x=mydata[3,i],names(mydata)[i])
+}
+
+Q7:
+hist(mydata_new$hundred_percent)
+for (i in 1:length(mydata_new)) {
+  abline(v=mydata[3,i],col="red")
+  text(x=mydata[3,i],names(mydata)[i])
+}
+
+#for faithful$eruption
+Q1:
+one <- faithful$eruption[sample(1:nrow(faithful),0.01*nrow(faithful)), ]
+min1 <- min(one)
+max1 <- max(one)
+mean1 <- mean(one)
+var1 <- var(one)
+one_percent <- c(min1,max1,mean1,var1)
+
+ten <- faithful$eruption[sample(1:nrow(faithful),0.1*nrow(faithful)), ]
+min2 <- min(ten)
+max2 <- max(ten)
+mean2 <- mean(ten)
+var2 <- var(ten)
+ten_percent <- c(min2,max2,mean2,var2)
+
+twentyfive <- faithful$eruption[sample(1:nrow(faithful),0.25*nrow(faithful)), ]
+min3 <- min(twentyfive)
+max3 <- max(twentyfive)
+mean3 <- mean(twentyfive)
+var3 <- var(twentyfive)
+twentyfive_percent <- c(min3,max3,mean3,var3)
+
+fifty <- faithful$eruption[sample(1:nrow(faithful),0.5*nrow(faithful)), ]
+min4 <- min(fifty)
+max4 <- max(fifty)
+mean4 <- mean(fifty)
+var4 <- var(fifty)
+fifty_percent <- c(min4,max4,mean4,var4)
+
+eighty <- faithful$eruption[sample(1:nrow(faithful),0.8*nrow(faithful)), ]
+min5 <- min(eighty)
+max5 <- max(eighty)
+mean5 <- mean(eighty)
+var5 <- var(eighty)
+eighty_percent <- c(min5,max5,mean5,var5)
+
+hundred <- faithful$eruption[sample(1:nrow(faithful),1*nrow(faithful)), ]
+min6 <- min(hundred)
+max6 <- max(hundred)
+mean6 <- mean(hundred)
+var6 <- var(hundred)
+hundred_percent <- c(min6,max6,mean6,var6)
+
+mydata <- data.frame(one_percent,ten_percent,twentyfive_percent,fifty_percent,eighty_percent,hundred_percent)
+
+mydata
+rownames(mydata) <- c("SampleMin","SampleMax","SampleMean","SampleVar")
+#set the row names for the data frame mydata.
+
+Q2:
+grid_plot(faithful$eruption,c(0.01,0.1,0.25,0.5,0.8,1))
+
+Q3:
+df <- data.frame(One_percent=numeric(),Ten_percent=numeric(),Twentyfive_percent=numeric(),Fifty_percent=numeric(),Eighty_percent=numeric())
+sample_size=c(0.01*nrow(faithful$eruption),0.1*nrow(faithful$eruption),0.25*nrow(faithful$eruption),0.5*nrow(faithful$eruption),0.8*nrow(faithful$eruption))
+for (i in 1:1000) {
+  for (j in 1:5) {
+    persample <- faithful$eruption[sample(1:nrow(faithful$eruption),sample_size[j])]
+    df[i,j] <- mean(persample)
+  }
+}
+
+Q4:
+grid_plot1(df)
+
+Q5:
+mydata_new = mydata
+for (i in 1:length(df)){
+  new_sample <- df[[i]]
+  min <- min(new_sample)
+  max <- max(new_sample)
+  mean <- mean(new_sample)
+  var <- var(new_sample)
+  mydata_new <- data.frame(mydata_new,c(min,max,mean,var))
+}
+mydata_new <- data.frame(mydata_new,hundred_percent)
+
+rownames(mydata_new) <- c("ResampleMin","ResampleMax","ResampleMean","ResampleVar")
+
+Q6:
+par(mfrow=(1,1))
+hist(mydata$hundred_percent)
+for (i in 1:length(mydata)) {
+  abline(v=mydata[3,i],col="red")
+  text(x=mydata[3,i],names(mydata)[i])
+}
+
+Q7:
+hist(mydata_new$hundred_percent)
+for (i in 1:length(mydata_new)) {
+  abline(v=mydata[3,i],col="red")
+  text(x=mydata[3,i],names(mydata)[i])
+}
+```
+
+9. Provide	a	brief	explanation	of	what	you	observe	in	the	measures	and	
+histograms	as	it	relates	to	sample size	and	resampling.
+```{r}
+As we can see, as the sample size and resampling getting larger, the measure and histogram is more accurate. The reason is that as the sample get larger, the sample will endcode more information about the population therefore it will present the population information more accurately.
+```
+
+
